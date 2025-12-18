@@ -1,0 +1,5 @@
+Allocator,Benchmark,AllocTime_us,FreeTime_us,AllocOps,FreeOps,AllocOpsPerSec,FreeOpsPerSec,PeakUtilization
+SegregatedFreeList,Sequential,966.00,52.00,10000,10000,10351966.87,192307692.31,0.061037
+SegregatedFreeList,Random,1859.00,35.00,2000,2000,1075847.23,57142857.14,0.198117
+SegregatedFreeList,Mixed,5.00,3.00,750,750,150000000.00,250000000.00,0.003815
+SegregatedFreeList,Stress,1580.00,97.00,10000,10000,6329113.92,103092783.51,0.244146

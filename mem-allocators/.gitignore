@@ -1,0 +1,12 @@
+# Python
+.venv/
+.venv_wsl/
+__pycache__/
+*.pyc
+
+# Results
+results/*.png
+
+# Build
+build/
+*.o
