@@ -13,7 +13,7 @@
 #define DEFAULT_HEAP_SIZE (10 * 1024 * 1024)  /* 10 MB */
 #define MAX_ALLOCS 10000
 
-/* Benchmark scenarios */
+/* Сценарии бенчмарка */
 typedef enum {
     BENCH_SEQUENTIAL,
     BENCH_RANDOM,
@@ -21,7 +21,7 @@ typedef enum {
     BENCH_STRESS
 } benchmark_type_t;
 
-/* Get current time in microseconds */
+/* Получить текущее время в микросекундах */
 static double get_time_us(void) {
 #ifdef _WIN32
     static LARGE_INTEGER freq;
@@ -40,7 +40,7 @@ static double get_time_us(void) {
 #endif
 }
 
-/* Benchmark result */
+/* Результат бенчмарка */
 typedef struct {
     const char* allocator_name;
     const char* benchmark_name;
@@ -53,12 +53,12 @@ typedef struct {
     double peak_utilization;
 } benchmark_result_t;
 
-/* Print CSV header */
+/* Печать заголовка CSV */
 void print_csv_header(void) {
     printf("Allocator,Benchmark,AllocTime_us,FreeTime_us,AllocOps,FreeOps,AllocOpsPerSec,FreeOpsPerSec,PeakUtilization\n");
 }
 
-/* Print benchmark result as CSV */
+/* Печать результата бенчмарка в формате CSV */
 void print_result_csv(const benchmark_result_t* result) {
     printf("%s,%s,%.2f,%.2f,%zu,%zu,%.2f,%.2f,%.6f\n",
            result->allocator_name,
@@ -72,11 +72,11 @@ void print_result_csv(const benchmark_result_t* result) {
            result->peak_utilization);
 }
 
-// Benchmark: Тестирует последовательное выделение и освобождение
+// Бенчмарк: тестирует последовательное выделение и освобождение
 // Какой аллокатор, его название, сколько операций, куда печатать
 void benchmark_sequential(allocator_t* alloc, const char* alloc_name, size_t num_ops, FILE* output) {
     size_t n = num_ops;
-    if (n > 100000) n = 100000; // cap pointer array size
+    if (n > 100000) n = 100000; // ограничиваем размер массива указателей
     void** ptrs = calloc(n, sizeof(void*));
     if (!ptrs) return;
 
@@ -129,7 +129,7 @@ void benchmark_sequential(allocator_t* alloc, const char* alloc_name, size_t num
     free(ptrs);
 }
 
-/* Benchmark: тестирует в случайных условиях */
+/* Бенчмарк: тестирует в случайных условиях */
 void benchmark_random(allocator_t* alloc, const char* alloc_name, size_t num_ops, FILE* output) {
     size_t cap = 2000;
     if (num_ops < cap) cap = num_ops;
@@ -139,7 +139,7 @@ void benchmark_random(allocator_t* alloc, const char* alloc_name, size_t num_ops
     allocator_reset_stats(alloc);
     srand(42);
 
-    // Phase A: allocations with random sizes
+    // Фаза А: выделения случайных размеров
     double alloc_start = get_time_us();
     size_t alloc_ok = 0;
     for (size_t i = 0; i < cap; i++) {
@@ -150,7 +150,7 @@ void benchmark_random(allocator_t* alloc, const char* alloc_name, size_t num_ops
     }
     double alloc_end = get_time_us();
 
-    // Shuffle pointers to approximate random free order
+    // Перемешиваем указатели, чтобы приблизить случайный порядок освобождения
     for (size_t i = 0; i + 1 < alloc_ok; i++) {
         size_t j = i + (rand() % (alloc_ok - i));
         void* tmp = ptrs[i];
@@ -197,7 +197,7 @@ void benchmark_random(allocator_t* alloc, const char* alloc_name, size_t num_ops
     free(ptrs);
 }
 
-/* Benchmark: Сочетание длинных и коротких операций */
+/* Бенчмарк: сочетание длинных и коротких операций */
 void benchmark_mixed(allocator_t* alloc, const char* alloc_name, size_t num_ops, FILE* output) {
     (void)num_ops;
     void* ptrs[500];
@@ -210,7 +210,7 @@ void benchmark_mixed(allocator_t* alloc, const char* alloc_name, size_t num_ops,
     size_t alloc_ops = 0;
     size_t free_ops = 0;
 
-    // Phase 1: allocate 500 small blocks
+    // Фаза 1: выделить 500 маленьких блоков
     double t0 = get_time_us();
     for (int i = 0; i < 500; i++) {
         ptrs[i] = allocator_alloc(alloc, 32);
@@ -219,7 +219,7 @@ void benchmark_mixed(allocator_t* alloc, const char* alloc_name, size_t num_ops,
     double t1 = get_time_us();
     alloc_time += (t1 - t0);
 
-    // Phase 2: free half
+    // Фаза 2: освободить половину
     t0 = get_time_us();
     for (int i = 0; i < 500; i += 2) {
         if (ptrs[i]) {
@@ -231,7 +231,7 @@ void benchmark_mixed(allocator_t* alloc, const char* alloc_name, size_t num_ops,
     t1 = get_time_us();
     free_time += (t1 - t0);
 
-    // Phase 3: allocate 250 larger blocks
+    // Фаза 3: выделить 250 более крупных блоков
     t0 = get_time_us();
     for (int i = 0; i < 500; i += 2) {
         ptrs[i] = allocator_alloc(alloc, 128);
@@ -240,7 +240,7 @@ void benchmark_mixed(allocator_t* alloc, const char* alloc_name, size_t num_ops,
     t1 = get_time_us();
     alloc_time += (t1 - t0);
 
-    // Phase 4: free all
+    // Фаза 4: освободить всё
     t0 = get_time_us();
     for (int i = 0; i < 500; i++) {
         if (ptrs[i]) {
@@ -280,7 +280,7 @@ void benchmark_mixed(allocator_t* alloc, const char* alloc_name, size_t num_ops,
     }
 }
 
-/* Benchmark: Стресс тест с множеством аллокаций */
+/* Бенчмарк: стресс-тест с множеством аллокаций */
 void benchmark_stress(allocator_t* alloc, const char* alloc_name, size_t num_ops, FILE* output) {
     void* ptrs[MAX_ALLOCS];
     int allocated = 0;
@@ -332,11 +332,11 @@ void benchmark_stress(allocator_t* alloc, const char* alloc_name, size_t num_ops
     }
 }
 
-
+// при запуске бенчмарков выделяется память для аллокатора, выполняются бенчмарки, память освобождается
 void run_benchmarks(allocator_type_t type, const char* name, size_t num_ops, FILE* output) {
     printf("Running benchmarks for %s...\n", name);
 
-    void* backing = malloc(DEFAULT_HEAP_SIZE + 64);
+    void* backing = malloc(DEFAULT_HEAP_SIZE + 64); // выделяем память с небольшим запасом
     if (!backing) {
         fprintf(stderr, "Failed to allocate backing memory\n");
         return;
@@ -351,7 +351,7 @@ void run_benchmarks(allocator_type_t type, const char* name, size_t num_ops, FIL
     benchmark_sequential(alloc, name, num_ops, output);
     allocator_destroy(alloc);
     free(backing);
-
+    // Повторяем для остальных бенчмарков
     backing = malloc(DEFAULT_HEAP_SIZE + 64);
     if (!backing) return;
     alloc = allocator_create(type, backing, DEFAULT_HEAP_SIZE);

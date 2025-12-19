@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Plotting script for memory allocator benchmark results
-Requires: matplotlib, pandas
-Install with: pip3 install matplotlib pandas
+Скрипт построения графиков по результатам бенчмарков аллокаторов памяти
+Требуется: matplotlib, pandas
+Установка: pip3 install matplotlib pandas
 """
 
 import sys
@@ -14,31 +14,31 @@ import matplotlib
 matplotlib.use('Agg')
 
 def plot_results(csv_file, output_file=None):
-    """Plot benchmark results from CSV file"""
+    """Построить графики по результатам бенчмарка из CSV-файла"""
     
-    # Check if file exists
+    # Проверяем, существует ли файл
     if not os.path.exists(csv_file):
         print(f"Error: File not found: {csv_file}")
         return False
     
-    # Read CSV file
+    # Читаем CSV
     try:
         df = pd.read_csv(csv_file)
     except Exception as e:
         print(f"Error reading CSV file: {e}")
         return False
     
-    # Check required columns
+    # Проверяем наличие обязательных столбцов
     required_cols = ['Allocator', 'Benchmark', 'AllocOpsPerSec', 'FreeOpsPerSec', 'PeakUtilization']
     if not all(col in df.columns for col in required_cols):
         print(f"Error: CSV file must contain columns: {required_cols}")
         return False
     
-    # Create figure with subplots
+    # Создаём фигуру с подграфиками
     fig, axs = plt.subplots(1, 3, figsize=(18, 6))
     ax1, ax2, ax3 = axs
     
-    # Plot 1: Operations per second by benchmark
+    # График 1: пропускная способность выделения (операций/сек) по сценариям
     pivot_data = df.pivot(index='Benchmark', columns='Allocator', values='AllocOpsPerSec')
     pivot_data.plot(kind='bar', ax=ax1, rot=45)
     ax1.set_title('Allocation Throughput (ops/sec)', fontsize=14, fontweight='bold')
@@ -47,7 +47,7 @@ def plot_results(csv_file, output_file=None):
     ax1.legend(title='Allocator', fontsize=10)
     ax1.grid(True, alpha=0.3)
     
-    # Plot 2: Time comparison
+    # График 2: пропускная способность освобождения (операций/сек) по сценариям
     pivot_free = df.pivot(index='Benchmark', columns='Allocator', values='FreeOpsPerSec')
     pivot_free.plot(kind='bar', ax=ax2, rot=45)
     ax2.set_title('Free Throughput (ops/sec)', fontsize=14, fontweight='bold')
@@ -64,15 +64,15 @@ def plot_results(csv_file, output_file=None):
     ax3.legend(title='Allocator', fontsize=10)
     ax3.grid(True, alpha=0.3)
     
-    # Adjust layout
+    # Подгоняем разметку
     plt.tight_layout()
     
-    # Save or show plot
+    # Сохраняем график
     if output_file:
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
         print(f"Plot saved to: {output_file}")
     else:
-        # Generate default filename
+        # Генерируем имя по умолчанию
         output_file = csv_file.replace('.csv', '.png')
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
         print(f"Plot saved to: {output_file}")
@@ -81,7 +81,7 @@ def plot_results(csv_file, output_file=None):
     return True
 
 def plot_comparison(files, output_file='comparison.png'):
-    """Plot comparison of multiple result files"""
+    """Построить сравнительный график по нескольким файлам результатов"""
     
     all_data = []
     for file in files:
@@ -98,13 +98,13 @@ def plot_comparison(files, output_file='comparison.png'):
         print("Error: No valid data files")
         return False
     
-    # Combine all data
+    # Объединяем данные
     combined = pd.concat(all_data, ignore_index=True)
     
-    # Create comprehensive comparison plot
+    # Создаём общий сравнительный график
     fig = plt.figure(figsize=(18, 10))
     
-    # Plot 1: Overall performance comparison
+    # График 1: средняя скорость выделения
     ax1 = plt.subplot(2, 2, 1)
     pivot_ops = combined.pivot_table(
         index='Benchmark', 
@@ -119,7 +119,7 @@ def plot_comparison(files, output_file='comparison.png'):
     ax1.legend(title='Allocator', fontsize=9)
     ax1.grid(True, alpha=0.3)
     
-    # Plot 2: Execution time comparison
+    # График 2: средняя скорость освобождения
     ax2 = plt.subplot(2, 2, 2)
     pivot_time = combined.pivot_table(
         index='Benchmark', 
@@ -134,7 +134,7 @@ def plot_comparison(files, output_file='comparison.png'):
     ax2.legend(title='Allocator', fontsize=9)
     ax2.grid(True, alpha=0.3)
     
-    # Plot 3: Performance by allocator
+    # График 3: утилизация памяти по аллокатору
     ax3 = plt.subplot(2, 2, 3)
     allocator_avg = combined.groupby('Allocator')['PeakUtilization'].mean()
     allocator_avg.plot(kind='bar', ax=ax3, rot=45, color=['#2ca02c', '#d62728'])
@@ -143,11 +143,11 @@ def plot_comparison(files, output_file='comparison.png'):
     ax3.set_ylabel('Avg PeakUtilization')
     ax3.grid(True, alpha=0.3)
     
-    # Plot 4: Summary statistics
+    # График 4: краткая сводка
     ax4 = plt.subplot(2, 2, 4)
     ax4.axis('off')
     
-    # Calculate summary statistics
+    # Считаем сводные показатели
     summary_text = "Summary Statistics\n\n"
     for allocator in combined['Allocator'].unique():
         alloc_data = combined[combined['Allocator'] == allocator]
@@ -172,21 +172,21 @@ def plot_comparison(files, output_file='comparison.png'):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Plot memory allocator benchmark results'
+        description='Построение графиков по результатам бенчмарков аллокаторов памяти'
     )
     parser.add_argument(
         'input_files', 
         nargs='+', 
-        help='CSV file(s) containing benchmark results'
+        help='CSV-файл(ы) с результатами бенчмарка'
     )
     parser.add_argument(
         '-o', '--output',
-        help='Output image file (default: same as input with .png extension)'
+        help='Файл изображения на выходе (по умолчанию: как входной, но с расширением .png)'
     )
     parser.add_argument(
         '-c', '--comparison',
         action='store_true',
-        help='Create comparison plot from multiple files'
+        help='Построить сравнительный график по нескольким файлам'
     )
     
     args = parser.parse_args()

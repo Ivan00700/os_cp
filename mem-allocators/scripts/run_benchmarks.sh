@@ -1,31 +1,31 @@
 #!/bin/bash
-# Runner script for memory allocator benchmarks
+# Скрипт запуска бенчмарков для аллокаторов памяти
 
 set -e
 
-# Colors for output
+# Цвета для вывода
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m' # без цвета
 
 echo -e "${GREEN}=== Memory Allocator Benchmark Runner ===${NC}"
 echo ""
 
-# Check if project is built
+# Проверяем, собран ли проект
 if [ ! -f "build/benchmark" ]; then
     echo -e "${YELLOW}Building project...${NC}"
     make all
     echo ""
 fi
 
-# Create results directory if it doesn't exist
+# Создаём каталог результатов, если его нет
 mkdir -p results
 
-# Default number of operations
+# Число операций по умолчанию
 NUM_OPS=10000
 
-# Parse command line arguments
+# Разбор аргументов командной строки
 while [[ $# -gt 0 ]]; do
     case $1 in
         -n|--num-ops)
@@ -46,7 +46,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Run unit tests first
+# Сначала запускаем модульные тесты
 echo -e "${GREEN}Running unit tests...${NC}"
 ./build/test_allocators
 if [ $? -eq 0 ]; then
@@ -57,15 +57,15 @@ else
     exit 1
 fi
 
-# Run benchmarks
+# Запускаем бенчмарки
 echo -e "${GREEN}Running benchmarks with ${NUM_OPS} operations...${NC}"
 echo ""
 
-# Run both allocators
+# Запуск для обоих аллокаторов
 echo -e "${YELLOW}Benchmarking both allocators...${NC}"
 ./build/benchmark -n ${NUM_OPS} -o results/benchmark_results.csv
 
-# Run individual allocators for comparison
+# Запуск по отдельности (для сравнения)
 echo ""
 echo -e "${YELLOW}Benchmarking Segregated Free-List allocator...${NC}"
 ./build/benchmark -a segregated -n ${NUM_OPS} -o results/segregated_results.csv

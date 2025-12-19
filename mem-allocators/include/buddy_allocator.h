@@ -3,7 +3,7 @@
 
 #include "allocator.h"
 
-// Buddy (power-of-two) allocator working fully in-place on a provided memory region.
+// Аллокатор Бадди (блоки размера 2^n), полностью работающий «на месте» на предоставленном участке памяти
 
 bool buddy_allocator_init(allocator_t* alloc, void* region, size_t region_size);
 void buddy_allocator_deinit(allocator_t* alloc);

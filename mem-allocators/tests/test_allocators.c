@@ -6,7 +6,7 @@
 
 #define TEST_HEAP_SIZE (1024 * 1024)  /* 1 MB */
 
-/* Test result tracking */
+/* Учёт результатов тестов */
 static int tests_passed = 0;
 static int tests_failed = 0;
 
@@ -36,7 +36,7 @@ static int tests_failed = 0;
         } \
     } while(0)
 
-/* Test basic allocation and deallocation */
+/* Тест: базовое выделение и освобождение */
 void test_basic_alloc_free(allocator_type_t type, const char* name) {
     TEST(name);
 
@@ -48,7 +48,7 @@ void test_basic_alloc_free(allocator_type_t type, const char* name) {
     void* ptr = allocator_alloc(alloc, 100);
     ASSERT(ptr != NULL, "Failed to allocate memory");
     
-    memset(ptr, 0xAA, 100);  /* Write to memory to test it works */
+    memset(ptr, 0xAA, 100);  /* Запишем в память, чтобы проверить корректность */
     
     allocator_free(alloc, ptr);
     allocator_destroy(alloc);
@@ -58,7 +58,7 @@ void test_basic_alloc_free(allocator_type_t type, const char* name) {
     TEST_PASS();
 }
 
-/* Test multiple allocations */
+/* Тест: несколько выделений */
 void test_multiple_allocs(allocator_type_t type, const char* name) {
     TEST(name);
 
@@ -83,7 +83,7 @@ void test_multiple_allocs(allocator_type_t type, const char* name) {
     TEST_PASS();
 }
 
-/* Test allocation of different sizes */
+/* Тест: выделения разных размеров */
 void test_varied_sizes(allocator_type_t type, const char* name) {
     TEST(name);
 
@@ -109,7 +109,7 @@ void test_varied_sizes(allocator_type_t type, const char* name) {
     TEST_PASS();
 }
 
-/* Test reuse of freed memory */
+/* Тест: повторное использование освобождённой памяти */
 void test_memory_reuse(allocator_type_t type, const char* name) {
     TEST(name);
 
@@ -132,7 +132,7 @@ void test_memory_reuse(allocator_type_t type, const char* name) {
     TEST_PASS();
 }
 
-/* Test allocation patterns */
+/* Тест: шаблоны (паттерны) выделения */
 void test_alloc_pattern(allocator_type_t type, const char* name) {
     TEST(name);
 
@@ -141,7 +141,7 @@ void test_alloc_pattern(allocator_type_t type, const char* name) {
     allocator_t* alloc = allocator_create(type, backing, TEST_HEAP_SIZE);
     ASSERT(alloc != NULL, "Failed to create allocator");
     
-    /* Allocate, free, allocate pattern */
+    /* Паттерн: выделить → освободить → снова выделить */
     for (int i = 0; i < 5; i++) {
         void* ptr = allocator_alloc(alloc, 200);
         ASSERT(ptr != NULL, "Failed to allocate in pattern");
@@ -154,7 +154,7 @@ void test_alloc_pattern(allocator_type_t type, const char* name) {
     TEST_PASS();
 }
 
-/* Test edge cases */
+/* Тест: граничные случаи */
 void test_edge_cases(allocator_type_t type, const char* name) {
     TEST(name);
 
@@ -163,11 +163,11 @@ void test_edge_cases(allocator_type_t type, const char* name) {
     allocator_t* alloc = allocator_create(type, backing, TEST_HEAP_SIZE);
     ASSERT(alloc != NULL, "Failed to create allocator");
     
-    /* Allocate size 0 should return NULL */
+    /* Выделение размера 0 должно вернуть NULL */
     void* ptr = allocator_alloc(alloc, 0);
     ASSERT(ptr == NULL, "Allocating 0 bytes should return NULL");
     
-    /* Free NULL should not crash */
+    /* Освобождение NULL не должно приводить к падению */
     allocator_free(alloc, NULL);
     
     allocator_destroy(alloc);

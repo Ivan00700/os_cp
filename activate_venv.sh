@@ -1,5 +1,5 @@
 #!/bin/bash
 # Активируем виртуальное окружение
-# source
+# Команда source
 echo "activating..."
 source .venv/bin/activate
